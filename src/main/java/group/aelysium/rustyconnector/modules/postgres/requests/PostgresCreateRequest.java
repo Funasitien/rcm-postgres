@@ -1,6 +1,6 @@
-package group.aelysium.rustyconnector.modules.mysql.requests;
+package group.aelysium.rustyconnector.modules.postgres.requests;
 
-import group.aelysium.rustyconnector.modules.mysql.MySQLDatabase;
+import group.aelysium.rustyconnector.modules.postgres.PostgresDatabase;
 import group.aelysium.rustyconnector.shaded.group.aelysium.haze.exceptions.HazeException;
 import group.aelysium.rustyconnector.shaded.group.aelysium.haze.requests.CreateRequest;
 import org.jetbrains.annotations.NotNull;
@@ -9,9 +9,9 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.ResultSet;
 
-public class MySQLCreateRequest extends CreateRequest {
-    public MySQLCreateRequest(
-            @NotNull MySQLDatabase database,
+public class PostgresCreateRequest extends CreateRequest {
+    public PostgresCreateRequest(
+            @NotNull PostgresDatabase database,
             @NotNull String target
     ) {
         super(database, target);
@@ -34,7 +34,7 @@ public class MySQLCreateRequest extends CreateRequest {
 
         String query = "INSERT INTO " + target + " (" + columns + ") VALUES (" + values + ")";
         try (
-                Connection connection = ((MySQLDatabase) this.database).dataSource().getConnection();
+                Connection connection = ((PostgresDatabase) this.database).dataSource().getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS)
         ) {
             int index = 1;

@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.modules.mysql;
+package group.aelysium.rustyconnector.modules.postgres;
 
 import group.aelysium.rustyconnector.RC;
 import group.aelysium.rustyconnector.common.errors.Error;
@@ -13,11 +13,11 @@ import java.sql.SQLException;
 import java.util.Map;
 
 @Namespace("rustyconnector-modules")
-@Config("/rcm-mysql/{name}.yml")
+@Config("/rcm-postgres/{name}.yml")
 @Comment({
         "############################################################",
         "#||||||||||||||||||||||||||||||||||||||||||||||||||||||||||#",
-        "#                    MySQL Haze Database                   #",
+        "#                    Postgres Haze Database                   #",
         "#                                                          #",
         "#               ---------------------------                #",
         "#                                                          #",
@@ -41,7 +41,7 @@ public class DatabaseConfig {
     @Node(1)
     private String address = "127.0.0.1";
     @Node(2)
-    private int port = 3306;
+    private int port = 5432;
     @Node(3)
     private String username = "root";
     @Node(4)
@@ -50,11 +50,11 @@ public class DatabaseConfig {
     private int maxPoolSize = 100;
     
     public @NotNull Module.Builder<HazeDatabase> builder() {
-        return new Module.Builder<>(name, "A MySQL connection that connects to the database " + name + ".") {
+        return new Module.Builder<>(name, "A Postgres connection that connects to the database " + name + ".") {
             @Override
-            public MySQLDatabase get() {
+            public PostgresDatabase get() {
                 try {
-                    return new MySQLDatabase(
+                    return new PostgresDatabase(
                         database,
                         address,
                         port,
@@ -63,7 +63,7 @@ public class DatabaseConfig {
                         maxPoolSize
                     );
                 } catch (SQLException e) {
-                    RC.Error(Error.from(e).urgent(true).whileAttempting("To initialize the mysql connection."));
+                    RC.Error(Error.from(e).urgent(true).whileAttempting("To initialize the postgres connection."));
                 }
                 return null;
             }

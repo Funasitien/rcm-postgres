@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.modules.mysql.lib;
+package group.aelysium.rustyconnector.modules.postgres.lib;
 import group.aelysium.rustyconnector.shaded.com.google.code.gson.gson.*;
 
 import java.lang.reflect.Type;

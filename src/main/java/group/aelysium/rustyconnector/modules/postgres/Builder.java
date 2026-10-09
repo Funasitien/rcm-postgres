@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.modules.mysql;
+package group.aelysium.rustyconnector.modules.postgres;
 
 
 import group.aelysium.rustyconnector.common.haze.HazeProvider;
@@ -16,7 +16,7 @@ import java.util.function.Consumer;
 public class Builder extends ExternalModuleBuilder<Module> {
     private static final Consumer<HazeProvider> register = haze -> {
         try {
-            File directory = new File("rc-modules/rcm-mysql");
+            File directory = new File("rc-modules/rcm-postgres");
             if(!directory.exists()) directory.mkdirs();
 
             {
@@ -60,7 +60,7 @@ public class Builder extends ExternalModuleBuilder<Module> {
         return new Module() {
             @Override
             public @Nullable Component details() {
-                return Component.text("The MySQL Haze Driver doesn't contain any native details for you. Check the Haze provider for haze details.");
+                return Component.text("The Postgres Haze Driver doesn't contain any native details for you. Check the Haze provider for haze details.");
             }
 
             @Override

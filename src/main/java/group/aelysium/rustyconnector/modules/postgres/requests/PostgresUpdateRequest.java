@@ -1,7 +1,7 @@
-package group.aelysium.rustyconnector.modules.mysql.requests;
+package group.aelysium.rustyconnector.modules.postgres.requests;
 
-import group.aelysium.rustyconnector.modules.mysql.MySQLDatabase;
-import group.aelysium.rustyconnector.modules.mysql.lib.Converter;
+import group.aelysium.rustyconnector.modules.postgres.PostgresDatabase;
+import group.aelysium.rustyconnector.modules.postgres.lib.Converter;
 import group.aelysium.rustyconnector.shaded.group.aelysium.haze.exceptions.HazeException;
 import group.aelysium.rustyconnector.shaded.group.aelysium.haze.lib.Filter;
 import group.aelysium.rustyconnector.shaded.group.aelysium.haze.lib.KeyValue;
@@ -11,9 +11,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-public class MySQLUpdateRequest extends UpdateRequest {
-    public MySQLUpdateRequest(
-            @NotNull MySQLDatabase database,
+public class PostgresUpdateRequest extends UpdateRequest {
+    public PostgresUpdateRequest(
+            @NotNull PostgresDatabase database,
             @NotNull String target
     ) {
         super(database, target);
@@ -33,7 +33,7 @@ public class MySQLUpdateRequest extends UpdateRequest {
         query.append(Converter.convert(this.filter));
 
         try (
-                Connection connection = ((MySQLDatabase) this.database).dataSource().getConnection();
+                Connection connection = ((PostgresDatabase) this.database).dataSource().getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(query.toString())
         ) {
             int index = 1;

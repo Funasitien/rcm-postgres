@@ -1,12 +1,12 @@
-package group.aelysium.rustyconnector.modules.mysql;
+package group.aelysium.rustyconnector.modules.postgres;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 import group.aelysium.rustyconnector.common.haze.HazeDatabase;
 import group.aelysium.rustyconnector.common.modules.Module;
-import group.aelysium.rustyconnector.modules.mysql.lib.LocalDateTimeSerializer;
-import group.aelysium.rustyconnector.modules.mysql.requests.*;
+import group.aelysium.rustyconnector.modules.postgres.lib.LocalDateTimeSerializer;
+import group.aelysium.rustyconnector.modules.postgres.requests.*;
 import group.aelysium.rustyconnector.shaded.com.google.code.gson.gson.Gson;
 import group.aelysium.rustyconnector.shaded.com.google.code.gson.gson.GsonBuilder;
 import group.aelysium.rustyconnector.shaded.group.aelysium.haze.exceptions.HazeCastingException;
@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
 import java.util.StringJoiner;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class MySQLDatabase extends HazeDatabase implements Module {
+public class PostgresDatabase extends HazeDatabase implements Module {
     public static final Gson gson = new GsonBuilder()
         .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeSerializer())
         .create();
@@ -35,7 +35,7 @@ public class MySQLDatabase extends HazeDatabase implements Module {
     protected final String password;
     protected final int poolSize;
 
-    public MySQLDatabase(
+    public PostgresDatabase(
         @NotNull String database,
         @NotNull String address,
         int port,
@@ -51,18 +51,18 @@ public class MySQLDatabase extends HazeDatabase implements Module {
         this.poolSize = poolSize;
         
         try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
+            Class.forName("org.postgresql.Driver");
         } catch(Exception ignore) {}
         
         HikariConfig config = new HikariConfig();
-        config.setJdbcUrl("jdbc:mysql://"+this.address+":"+this.port+"/"+this.name);
+        config.setJdbcUrl("jdbc:postgresql://"+this.address+":"+this.port+"/"+this.name);
         config.setUsername(this.username);
         config.setPassword(this.password);
         config.setMaximumPoolSize(this.poolSize);
         config.setLeakDetectionThreshold(2000);
         config.setConnectionTimeout(60000);
-        config.addDataSourceProperty("useSSL", "false");
-        config.addDataSourceProperty("allowPublicKeyRetrieval", "true");
+        config.addDataSourceProperty("ssl", "false");
+        
         this.dataSource = new HikariDataSource(config);
     }
 
@@ -74,35 +74,35 @@ public class MySQLDatabase extends HazeDatabase implements Module {
     public CreateRequest newCreateRequest(@NotNull String target) {
         if(this.closed.get()) throw new HazeException("This HazeDatabase connection is closed.");
         
-        return new MySQLCreateRequest(this, target);
+        return new PostgresCreateRequest(this, target);
     }
 
     @Override
     public ReadRequest newReadRequest(@NotNull String target) {
         if(this.closed.get()) throw new HazeException("This HazeDatabase connection is closed.");
         
-        return new MySQLReadRequest(this, target);
+        return new PostgresReadRequest(this, target);
     }
 
     @Override
     public UpdateRequest newUpdateRequest(@NotNull String target) {
         if(this.closed.get()) throw new HazeException("This HazeDatabase connection is closed.");
         
-        return new MySQLUpdateRequest(this, target);
+        return new PostgresUpdateRequest(this, target);
     }
 
     @Override
     public UpsertRequest newUpsertRequest(@NotNull String target) {
         if(this.closed.get()) throw new HazeException("This HazeDatabase connection is closed.");
 
-        return new MySQLUpsertRequest(this, target);
+        return new PostgresUpsertRequest(this, target);
     }
     
     @Override
     public DeleteRequest newDeleteRequest(@NotNull String target) {
         if(this.closed.get()) throw new HazeException("This HazeDatabase connection is closed.");
         
-        return new MySQLDeleteRequest(this, target);
+        return new PostgresDeleteRequest(this, target);
     }
 
     @Override
@@ -113,13 +113,13 @@ public class MySQLDatabase extends HazeDatabase implements Module {
         StringJoiner columnDefinitions = new StringJoiner(", ");
 
         if(dataHolder.keys().values().stream().noneMatch(group.aelysium.rustyconnector.shaded.group.aelysium.haze.lib.Type::primaryKey))
-            columnDefinitions.add("id INT AUTO_INCREMENT PRIMARY KEY");
+            columnDefinitions.add("id INT SERIAL PRIMARY KEY");
 
         dataHolder.keys().forEach((k, v) -> {
             StringBuilder columnDefinition = new StringBuilder();
             columnDefinition.append(k)
                 .append(" ")
-                .append(getMySQLType(v));
+                .append(getPostgresType(v));
 
             if (!v.nullable()) columnDefinition.append(" NOT NULL");
             if (v.unique()) columnDefinition.append(" UNIQUE");
@@ -140,46 +140,43 @@ public class MySQLDatabase extends HazeDatabase implements Module {
         }
     }
 
-    private String getMySQLType(group.aelysium.rustyconnector.shaded.group.aelysium.haze.lib.Type key) {
+    private String getPostgresType(group.aelysium.rustyconnector.shaded.group.aelysium.haze.lib.Type key) {
         if(this.closed.get()) throw new HazeException("This HazeDatabase connection is closed.");
         
         return switch (key.type()) {
             case STRING -> {
-                if (key.length() == -1) yield "VARCHAR(n)";  // Use 255 for unlimited length varchar
+                if (key.length() == -1) yield "TEXT";
                 if (key.length() > 0) yield "VARCHAR(" + key.length() + ")";
                 yield "TEXT";
             }
             case INTEGER -> {
-                if (key.length() == 1) yield "TINYINT";
+                if (key.length() == 1) yield "SMALLINT";
                 if (key.length() <= 3) yield "SMALLINT";
-                if (key.length() <= 5) yield "MEDIUMINT";
+                if (key.length() <= 5) yield "INTEGER";
                 if (key.length() <= 8) yield "BIGINT";
-                yield "INT";
+                yield "INTEGER";
             }
             case UNSIGNED_INTEGER -> {
-                if (key.length() == 1) yield "UNSIGNED TINYINT";
-                if (key.length() <= 3) yield "UNSIGNED SMALLINT";
-                if (key.length() <= 5) yield "UNSIGNED MEDIUMINT";
-                if (key.length() <= 8) yield "UNSIGNED BIGINT";
-                yield "UNSIGNED INT";
+                if (key.length() == 1) yield "SMALLINT";
+                if (key.length() <= 3) yield "INTEGER";
+                if (key.length() <= 5) yield "BIGINT";
+                if (key.length() <= 8) yield "BIGINT"; // No UNSIGNED BIGINT in Postgres, fallback to BIGINT or NUMERIC
+                yield "BIGINT";
             }
             case DECIMAL -> {
                 if (key.length() > 0) yield "DECIMAL(" + key.length() + ", 2)";
                 yield "DECIMAL(10, 2)";
             }
             case UNSIGNED_DECIMAL -> {
-                if (key.length() > 0) yield "UNSIGNED DECIMAL(" + key.length() + ", 2)";
-                yield "UNSIGNED DECIMAL(10, 2)";
+                if (key.length() > 0) yield "DECIMAL(" + key.length() + ", 2)";
+                yield "DECIMAL(10, 2)";
             }
-            case BOOLEAN -> "TINYINT(1)";
+            case BOOLEAN -> "BOOLEAN";
             case DATE -> "DATE";
-            case DATETIME -> "DATETIME";
+            case DATETIME -> "TIMESTAMP";
             case TIME -> "TIME";
-            case BINARY -> {
-                if (key.length() > 0) yield "VARBINARY(" + key.length() + ")";
-                yield "BLOB";
-            }
-            case ARRAY, OBJECT -> "varchar(n)";
+            case BINARY -> "BYTEA";
+            case ARRAY, OBJECT -> "TEXT";
         };
     }
 

@@ -1,7 +1,7 @@
 {
-  "main": "group.aelysium.rustyconnector.modules.mysql.Builder",
-  "name": "Haze-MySQL",
-  "description": "Provides MySQL driver functionalities for the Haze provider.",
+  "main": "group.aelysium.rustyconnector.modules.postgres.Builder",
+  "name": "Haze-Postgres",
+  "description": "Provides Postgres driver functionalities for the Haze provider.",
   "dependencies": [],
   "environments": [ "proxy", "server" ]
 }

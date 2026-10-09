@@ -1,4 +1,4 @@
-package group.aelysium.rustyconnector.modules.mysql.lib;
+package group.aelysium.rustyconnector.modules.postgres.lib;
 
 import group.aelysium.rustyconnector.shaded.group.aelysium.haze.lib.Filter;
 import group.aelysium.rustyconnector.shaded.group.aelysium.haze.lib.KeyValue;
@@ -14,7 +14,7 @@ public interface Converter {
             case OR -> "OR";
             case AND_NOT -> "AND NOT";
             case OR_NOT -> "OR NOT";
-            case EXCLUSIVE_OR -> "XOR";
+            case EXCLUSIVE_OR -> "!=";
         };
     }
     
@@ -72,14 +72,21 @@ public interface Converter {
         return " WHERE " + clause;
     }
     
+    
     static @NotNull String convert(int startAt, int endAt) {
         StringBuilder queryBuilder = new StringBuilder();
         
-        if (startAt != -1) queryBuilder.append(" OFFSET ").append(startAt);
-        if (endAt != -1) queryBuilder.append(" LIMIT ").append(endAt - startAt + 1);
+        if (endAt != -1) {
+            int limit = endAt - (startAt == -1 ? 0 : startAt) + 1;
+            queryBuilder.append(" LIMIT ").append(limit);
+        }
+        if (startAt != -1) {
+            queryBuilder.append(" OFFSET ").append(startAt);
+        }
         
         return queryBuilder.toString();
     }
+
     
     static @NotNull String convert(List<KeyValue<String, Orderable.Ordering>> orderBy) {
         if (orderBy == null) return "";

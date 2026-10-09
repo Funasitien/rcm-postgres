@@ -16,14 +16,14 @@ version = module_version
 
 repositories {
     mavenCentral()
-    maven { url = "https://maven.mrnavastar.me/snapshots/" }
-    maven { url = "https://maven.mrnavastar.me/releases/" }
+    maven { url = "https://java.funa.dev/snapshots/" }
+    maven { url = "https://java.funa.dev/releases/" }
 }
 
 dependencies {
-    compileOnly 'group.aelysium.rustyconnector:core:0.9.1'
+    compileOnly 'group.aelysium.rustyconnector:core:' + rustyconnector_version
 
-    shadow 'com.mysql:mysql-connector-j:9.2.0'
+    shadow 'org.postgresql:postgresql:42.7.2'
     shadow 'com.zaxxer:HikariCP:5.0.0'
     compileOnly 'net.kyori:adventure-api:4.17.0'
 }
@@ -48,8 +48,8 @@ shadowJar {
     archiveClassifier.set('')
     mergeServiceFiles()
 
-    //relocate "com.mysql", "group.aelysium.rustyconnector.modules.mysql.shaded.com.mysql"
-    relocate "com.zaxxer", "group.aelysium.rustyconnector.modules.mysql.shaded.com.zaxxer"
+    relocate "org.postgresql", "group.aelysium.rustyconnector.modules.postgres.shaded.org.postgresql"
+    relocate "com.zaxxer", "group.aelysium.rustyconnector.modules.postgres.shaded.com.zaxxer"
 
     configurations = [project.configurations.shadow]
 }

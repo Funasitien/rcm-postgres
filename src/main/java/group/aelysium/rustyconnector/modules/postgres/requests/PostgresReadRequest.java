@@ -1,7 +1,7 @@
-package group.aelysium.rustyconnector.modules.mysql.requests;
+package group.aelysium.rustyconnector.modules.postgres.requests;
 
-import group.aelysium.rustyconnector.modules.mysql.MySQLDatabase;
-import group.aelysium.rustyconnector.modules.mysql.lib.Converter;
+import group.aelysium.rustyconnector.modules.postgres.PostgresDatabase;
+import group.aelysium.rustyconnector.modules.postgres.lib.Converter;
 import group.aelysium.rustyconnector.shaded.com.google.code.gson.gson.JsonSyntaxException;
 import group.aelysium.rustyconnector.shaded.group.aelysium.haze.exceptions.HazeCastingException;
 import group.aelysium.rustyconnector.shaded.group.aelysium.haze.exceptions.HazeException;
@@ -20,9 +20,9 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class MySQLReadRequest extends ReadRequest {
-    public MySQLReadRequest(
-            @NotNull MySQLDatabase database,
+public class PostgresReadRequest extends ReadRequest {
+    public PostgresReadRequest(
+            @NotNull PostgresDatabase database,
             @NotNull String target
     ) {
         super(database, target);
@@ -35,7 +35,7 @@ public class MySQLReadRequest extends ReadRequest {
             Converter.convert(this.startAt, this.endAt);
 
         try (
-            Connection connection = ((MySQLDatabase) this.database).dataSource().getConnection();
+            Connection connection = ((PostgresDatabase) this.database).dataSource().getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(query)
         ) {
             if (this.filter != null) {
@@ -72,8 +72,8 @@ public class MySQLReadRequest extends ReadRequest {
 
                         try {
                             response.add(
-                                MySQLDatabase.gson.fromJson(
-                                    MySQLDatabase.gson.toJson(rows),
+                                PostgresDatabase.gson.fromJson(
+                                    PostgresDatabase.gson.toJson(rows),
                                     clazz
                                 )
                             );
@@ -113,8 +113,8 @@ public class MySQLReadRequest extends ReadRequest {
                         try(DataEntry entry = DataEntry.wrap(rows)) {
                             if(function.apply(entry))
                                 response.add(
-                                    MySQLDatabase.gson.fromJson(
-                                        MySQLDatabase.gson.toJson(rows),
+                                    PostgresDatabase.gson.fromJson(
+                                        PostgresDatabase.gson.toJson(rows),
                                         clazz
                                     )
                                 );
