@@ -22,7 +22,7 @@ public class Builder extends ExternalModuleBuilder<Module> {
             {
                 File[] files = directory.listFiles();
                 if (files == null || files.length == 0)
-                    DatabaseConfig.New("default");
+                    DatabaseConfig.New("postgres");
             }
 
             File[] files = directory.listFiles();
